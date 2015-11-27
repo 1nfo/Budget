@@ -13,8 +13,8 @@ class Transaction:
         self.comments = comments
 
     def __str__(self):
-        return '%-8.2f|%4d.%2d.%2d' % (
-            self.val, self.time.tm_year, self.time.tm_mon, self.time.tm_mday)
+        return '%-8.2f|%4d.%2d.%2d  |%s' % (
+            self.val, self.time.tm_year, self.time.tm_mon, self.time.tm_mday, self.comments)
 
 
 class Pool:
@@ -64,7 +64,7 @@ def dump(data, path=file_path):
 
 def shell():
     accounts, head = load()
-    print "Budget Shell (alpha)\nHEAD -->",head
+    print "Budget Shell (alpha)\nHEAD -->", head
     while True:
         p = raw_input(">>>").strip().lower()
         if p == "":
@@ -74,7 +74,7 @@ def shell():
             print "Quit Budget Shell"
             break
         elif p[0] == "re-build":
-            if raw_input("Please input reset code:") == "Imsurereboot":
+            if raw_input("Please input reset code:") == "Imsurere":
                 print "\r\nData cleaned!"
                 sys.stdout.flush()
                 accounts = {}
@@ -103,17 +103,37 @@ def shell():
             else:
                 print "No such %s account" % p.split()[1]
         elif p[0] == 'add' or p[0] == 'a':
-			if len(p)==3:
-				comm=p[2]
-			elif len(p)==2:
-				comm=raw_input("comment:")
-			accounts[head].add_transaction(Transaction(float(p[1]), comm))
-				
+            if len(p) == 3:
+                comm = p[2]
+            elif len(p) == 2:
+                comm = raw_input("comment:")
+            else:
+                continue
+            accounts[head].add_transaction(Transaction(float(p[1]), comm))
+            dump((accounts, head))
+
         elif p[0] == 'detail' or p[0] == 'd':
-            for i in accounts[head].tList:
+            tmp=accounts[head].tList
+            tmp.reverse()
+            for i in tmp:
                 print i
+            tmp.reverse()
         elif p[0] == "budget" or p[0] == "b":
             accounts[head].hint()
+        elif p[0] == "admin":
+            if raw_input("enter code:") == "admin":
+                while True:
+                    try:
+                        command = raw_input(">>_:")
+                        if not command == "quit":
+                            exec command
+                        else:
+                            break
+                    except Exception:
+                        print "cannot solve command!"
+
+            else:
+                print "Wrong!"
         else:
             print "Unknown command!"
     dump((accounts, head))
